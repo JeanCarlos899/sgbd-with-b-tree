@@ -36,7 +36,6 @@ def measure_memory():
     return mem_info.rss  # Retorna o uso de memória residente
 
 
-
 def main_menu():
     print("\n=== Menu Principal ===")
     print("1. Inserir dados na Árvore B\t\t5. Gerar dados aleatórios")
@@ -96,7 +95,7 @@ def main():
             execution_time = measure_execution_time(btree, data, operation)
             memory_usage = measure_memory()
             print(
-                f"Tempo de execução para {operation}: {execution_time:.6f} segundos")
+                f"Tempo de execução para {operation}: {execution_time * 1000:.2f} ms")
             print(f"Uso de memória: {memory_usage / (1024 ** 2):.2f} MB")
 
         elif choice == '7':

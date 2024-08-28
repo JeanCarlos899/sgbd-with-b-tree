@@ -43,10 +43,3 @@ O objetivo deste projeto é demonstrar a compreensão dos conceitos de Sistemas 
     ```bash
     python main.py
     ```
-
-  
-## Autores
-
-- [Avelar Rodrigues](https://github.com/avelando)
-- [Jean Carlos](https://github.com/JeanCarlos899)
-- [Karielly de Carvalho](https://github.com/Kariellyy)

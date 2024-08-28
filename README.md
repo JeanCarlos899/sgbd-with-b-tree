@@ -28,8 +28,7 @@ O objetivo deste projeto é demonstrar a compreensão dos conceitos de Sistemas 
 1. **Clone o Repositório:**
 
     ```bash
-    git clone https://github.com/seu-usuario/seu-repositorio.git
-    cd seu-repositorio
+    git clone git@github.com:JeanCarlos899/sgbd-with-b-tree.git
     ```
 
 2. **Instale as Dependências:** Certifique-se de que você tenha o Python instalado. Este projeto requer a biblioteca psutil, que pode ser instaladas via pip.

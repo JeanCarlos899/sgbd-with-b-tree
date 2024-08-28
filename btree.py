@@ -28,12 +28,12 @@ class BTree:
             temp = BTreeNode()
             self.root = temp
             temp.children.insert(0, root)
-            self.split_child(temp, 0)
-            self.insert_non_full(temp, k)
+            self._split_child(temp, 0)
+            self._insert_non_full(temp, k)
         else:
-            self.insert_non_full(root, k)
+            self._insert_non_full(root, k)
 
-    def insert_non_full(self, node: BTreeNode, k):
+    def _insert_non_full(self, node: BTreeNode, k):
         """Insere a chave k em um nó não cheio."""
         i = len(node.keys) - 1
         if node.leaf:
@@ -47,12 +47,12 @@ class BTree:
                 i -= 1
             i += 1
             if len(node.children[i].keys) == (2 * self.t) - 1:
-                self.split_child(node, i)
+                self._split_child(node, i)
                 if k > node.keys[i]:
                     i += 1
-            self.insert_non_full(node.children[i], k)
+            self._insert_non_full(node.children[i], k)
 
-    def split_child(self, x: BTreeNode, i: BTreeNode):
+    def _split_child(self, x: BTreeNode, i: BTreeNode):
         """Divide o filho y de x no índice i."""
         t = self.t
         y = x.children[i]
@@ -67,96 +67,101 @@ class BTree:
 
     def delete(self, k):
         """Remove uma chave k da árvore B."""
-        self.delete_internal(self.root, k)
+        if self.search(k) is None:
+            return False
 
-        # Se a raiz tiver 0 chaves e não for uma folha, substituímos a raiz
-        if len(self.root.keys) == 0:
-            if not self.root.leaf:
-                self.root = self.root.children[0]
-            else:
-                self.root = BTreeNode(leaf=True)
+        self._delete(self.root, k)
 
-    def delete_internal(self, node: BTreeNode, k):
-        """Função recursiva para remover uma chave da árvore B."""
+        # Caso especial: se a raiz ficar vazia e não for folha, devemos ajustá-la
+        if len(self.root.keys) == 0 and not self.root.leaf:
+            self.root = self.root.children[0]
+
+        return True
+
+
+    def _delete(self, node: BTreeNode, k):
         t = self.t
         i = 0
+        # Encontra o índice da chave k ou do filho apropriado
         while i < len(node.keys) and k > node.keys[i]:
             i += 1
 
-        if i < len(node.keys) and node.keys[i] == k:
-            # Caso 1: A chave a ser removida está em um nó folha
-            if node.leaf:
+        if node.leaf:
+            # Caso 1: Remover de um nó folha
+            if i < len(node.keys) and node.keys[i] == k:
                 node.keys.pop(i)
-            else:
-                # Caso 2: A chave a ser removida está em um nó interno
-                y = node.children[i]
-                z = node.children[i + 1]
-                if len(y.keys) >= t:
-                    node.keys[i] = self.get_predecessor(y)
-                    self.delete_internal(y, node.keys[i])
-                elif len(z.keys) >= t:
-                    node.keys[i] = self.get_successor(z)
-                    self.delete_internal(z, node.keys[i])
-                else:
-                    self.merge(node, i)
-                    self.delete_internal(y, k)
-        elif node.leaf:
-            # A chave não está na árvore
-            print("A chave {} não está presente na árvore.".format(k))
             return
+
+        # Se a chave está no nó não folha
+        if i < len(node.keys) and node.keys[i] == k:
+            if node.children[i].leaf:
+                # Caso 2a: O predecessor está em um nó folha
+                node.keys[i] = self._get_predecessor(node, i)
+                self._delete(node.children[i], node.keys[i])
+            elif node.children[i + 1].leaf:
+                # Caso 2b: O sucessor está em um nó folha
+                node.keys[i] = self._get_successor(node, i)
+                self._delete(node.children[i + 1], node.keys[i])
+            else:
+                # Caso 2c: Ambos filhos têm pelo menos t chaves
+                self._merge(node, i)
+                self._delete(node.children[i], k)
         else:
-            # A chave a ser removida não está presente neste nó
+            # Se a chave não está presente, desce para o filho adequado
             if len(node.children[i].keys) < t:
-                if i != 0 and len(node.children[i - 1].keys) >= t:
-                    self.borrow_from_prev(node, i)
-                elif i != len(node.keys) and len(node.children[i + 1].keys) >= t:
-                    self.borrow_from_next(node, i)
-                else:
-                    if i != len(node.keys):
-                        self.merge(node, i)
-                    else:
-                        self.merge(node, i - 1)
-            self.delete_internal(node.children[i], k)
+                self._fill(node, i)
+            self._delete(node.children[i], k)
 
-    def get_predecessor(self, node: BTreeNode):
-        """Obtém o predecessor de uma chave."""
-        while not node.leaf:
-            node = node.children[len(node.keys)]
-        return node.keys[-1]
+    def _get_predecessor(self, node: BTreeNode, i):
+        current = node.children[i]
+        while not current.leaf:
+            current = current.children[-1]
+        return current.keys[-1]
 
-    def get_successor(self, node: BTreeNode):
-        """Obtém o sucessor de uma chave."""
-        while not node.leaf:
-            node = node.children[0]
-        return node.keys[0]
+    def _get_successor(self, node: BTreeNode, i):
+        current = node.children[i + 1]
+        while not current.leaf:
+            current = current.children[0]
+        return current.keys[0]
 
-    def borrow_from_prev(self, node: BTreeNode, idx):
-        """Empresta uma chave do filho anterior de node.children[idx]."""
-        child = node.children[idx]
-        sibling = node.children[idx - 1]
-        child.keys.insert(0, node.keys[idx - 1])
-        if not child.leaf:
-            child.children.insert(0, sibling.children.pop())
-        node.keys[idx - 1] = sibling.keys.pop()
-
-    def borrow_from_next(self, node: BTreeNode, idx):
-        """Empresta uma chave do próximo filho de node.children[idx]."""
-        child = node.children[idx]
-        sibling = node.children[idx + 1]
-        child.keys.append(node.keys[idx])
-        if not child.leaf:
-            child.children.append(sibling.children.pop(0))
-        node.keys[idx] = sibling.keys.pop(0)
-
-    def merge(self, node: BTreeNode, idx):
-        """Funde node.children[idx] com node.children[idx+1]."""
-        child = node.children[idx]
-        sibling = node.children[idx + 1]
-        child.keys.append(node.keys.pop(idx))
+    def _merge(self, node: BTreeNode, i):
+        child = node.children[i]
+        sibling = node.children[i + 1]
+        child.keys.append(node.keys[i])
         child.keys.extend(sibling.keys)
         if not child.leaf:
             child.children.extend(sibling.children)
-        node.children.pop(idx + 1)
+        node.keys.pop(i)
+        node.children.pop(i + 1)
+
+    def _fill(self, node: BTreeNode, i):
+        t = self.t
+        if i != 0 and len(node.children[i - 1].keys) >= t:
+            self._borrow_from_prev(node, i)
+        elif i != len(node.keys) and len(node.children[i + 1].keys) >= t:
+            self._borrow_from_next(node, i)
+        else:
+            if i != len(node.keys):
+                self._merge(node, i)
+            else:
+                self._merge(node, i - 1)
+
+    def _borrow_from_prev(self, node: BTreeNode, i):
+        child = node.children[i]
+        sibling = node.children[i - 1]
+        child.keys.insert(0, node.keys[i - 1])
+        if not child.leaf:
+            child.children.insert(0, sibling.children.pop())
+        node.keys[i - 1] = sibling.keys.pop()
+
+    def _borrow_from_next(self, node: BTreeNode, i):
+        child = node.children[i]
+        sibling = node.children[i + 1]
+        child.keys.append(node.keys[i])
+        if not child.leaf:
+            child.children.append(sibling.children.pop(0))
+        node.keys[i] = sibling.keys.pop(0)
+
 
     def update(self, old_k, new_k):
         """Atualiza uma chave na árvore B."""

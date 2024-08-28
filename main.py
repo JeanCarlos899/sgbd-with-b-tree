@@ -21,7 +21,11 @@ def measure_execution_time(btree: BTree, data, operation):
             btree.insert(item)
     elif operation == 'delete':
         for item in data:
-            btree.delete(item)
+            deleted = btree.delete(item)
+            if not deleted:
+                print(f"Valor {item} não encontrado na árvore.")
+            else:
+                print(f"Valor {item} removido da árvore.")
     elif operation == 'search':
         for item in data:
             btree.search(item)
@@ -55,26 +59,56 @@ def main():
 
         if choice == '1':
             k = int(input("Digite o valor a ser inserido: "))
+
+            start_time = time.time()
             btree.insert(k)
-            print(f"Valor {k} inserido na árvore.")
+            end_time = time.time()
+
+            time_elapsed = end_time - start_time
+            print(
+                f"Valor {k} inserido na árvore em {time_elapsed * 1000:.4f} ms.")
 
         elif choice == '2':
             k = int(input("Digite o valor a ser buscado: "))
+
+            start_time = time.time()
             result = btree.search(k)
+            end_time = time.time()
+
+            time_elapsed = end_time - start_time
             if result:
-                print(f"Valor {k} encontrado na árvore.")
+                print(
+                    f"Valor {k} encontrado na árvore em {time_elapsed * 1000:.4f} ms.")
             else:
                 print(f"Valor {k} não encontrado na árvore.")
 
         elif choice == '3':
             old_k = int(input("Digite o valor a ser atualizado: "))
             new_k = int(input("Digite o novo valor: "))
+
+            start_time = time.time()
             btree.update(old_k, new_k)
+            end_time = time.time()
+
+            time_elapsed = end_time - start_time
+
+            print(
+                f"Valor {old_k} atualizado para {new_k} em {time_elapsed * 1000:.4f} ms.")
 
         elif choice == '4':
             k = int(input("Digite o valor a ser removido: "))
-            btree.delete(k)
-            print(f"Valor {k} removido da árvore.")
+
+            start_time = time.time()
+            deleted = btree.delete(k)
+            end_time = time.time()
+
+            time_elapsed = end_time - start_time
+
+            if deleted:
+                print(
+                    f"Valor {k} removido da árvore em {time_elapsed * 1000:.4f} ms.")
+            else:
+                print(f"Valor {k} não encontrado na árvore.")
 
         elif choice == '5':
             n = int(input("Quantos dados aleatórios deseja gerar? "))
@@ -82,7 +116,6 @@ def main():
                 input("Digite o início do intervalo de valores: "))
             range_end = int(input("Digite o fim do intervalo de valores: "))
             data = generate_random_data(n, range_start, range_end)
-            print(f"Dados gerados: {data}")
             for value in data:
                 btree.insert(value)
             print("Dados inseridos na árvore B.")
@@ -95,7 +128,7 @@ def main():
             execution_time = measure_execution_time(btree, data, operation)
             memory_usage = measure_memory()
             print(
-                f"Tempo de execução para {operation}: {execution_time * 1000:.2f} ms")
+                f"Tempo de execução para {operation}: {execution_time * 1000:.4f} ms")
             print(f"Uso de memória: {memory_usage / (1024 ** 2):.2f} MB")
 
         elif choice == '7':

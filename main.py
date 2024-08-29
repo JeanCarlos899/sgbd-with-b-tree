@@ -5,12 +5,9 @@ import psutil
 import os
 
 
-def generate_random_data(n, range_start=1, range_end=None):
-    """Gera uma lista de n números inteiros aleatórios entre range_start e range_end."""
-    if range_end is None:
-        range_end = n + 1
-
-    return random.sample(range(range_start, range_end), n)
+def generate_random_data(n):
+    """Gera uma lista de n números inteiros aleatórios"""
+    return random.sample(range(1, 2*n), n)
 
 
 def measure_execution_time(btree: BTree, data, operation):
@@ -43,14 +40,18 @@ def measure_memory():
 def main_menu():
     print("\n=== Menu Principal ===")
     print("1. Inserir dados na Árvore B\t\t5. Gerar dados aleatórios")
-    print("2. Buscar dados na Árvore B\t\t6. Avaliar desempenho (tempo e memória)")
-    print("3. Atualizar dados na Árvore B\t\t7. Exibir Árvore B")
-    print("4. Remover dados da Árvore B\t\t8. Salvar Árvore B em arquivo")
-    print("0. Sair\t\t\t\t\t9. Carregar Árvore B de arquivo")
+    print("2. Buscar dados na Árvore B\t\t6. Exibir Árvore B")
+    print("3. Atualizar dados na Árvore B\t\t7. Deletar database")
+    print("4. Remover dados da Árvore B\t\t0. Sair")
 
 
 def main():
-    t = int(input("Digite o grau mínimo da Árvore B (t): "))
+    # Cria o diretório 'database' se não existir
+    if not os.path.exists('database'):
+        os.makedirs('database')
+
+    # Inicializa a árvore B com grau mínimo t = 50
+    t = 100
     btree = BTree(t)
 
     while True:
@@ -65,8 +66,13 @@ def main():
             end_time = time.time()
 
             time_elapsed = end_time - start_time
+            mem_usage = measure_memory()
+
+            print("===========================================================")
             print(
                 f"Valor {k} inserido na árvore em {time_elapsed * 1000:.4f} ms.")
+            print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
+            print("===========================================================")
 
         elif choice == '2':
             k = int(input("Digite o valor a ser buscado: "))
@@ -76,9 +82,14 @@ def main():
             end_time = time.time()
 
             time_elapsed = end_time - start_time
+            mem_usage = measure_memory()
+
             if result:
+                print("===========================================================")
                 print(
                     f"Valor {k} encontrado na árvore em {time_elapsed * 1000:.4f} ms.")
+                print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
+                print("===========================================================")
             else:
                 print(f"Valor {k} não encontrado na árvore.")
 
@@ -91,9 +102,13 @@ def main():
             end_time = time.time()
 
             time_elapsed = end_time - start_time
+            mem_usage = measure_memory()
 
+            print("===========================================================")
             print(
                 f"Valor {old_k} atualizado para {new_k} em {time_elapsed * 1000:.4f} ms.")
+            print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
+            print("===========================================================")
 
         elif choice == '4':
             k = int(input("Digite o valor a ser removido: "))
@@ -103,44 +118,35 @@ def main():
             end_time = time.time()
 
             time_elapsed = end_time - start_time
+            mem_usage = measure_memory()
 
             if deleted:
+                print("===========================================================")
                 print(
                     f"Valor {k} removido da árvore em {time_elapsed * 1000:.4f} ms.")
+                print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
+                print("===========================================================")
             else:
                 print(f"Valor {k} não encontrado na árvore.")
 
         elif choice == '5':
             n = int(input("Quantos dados aleatórios deseja gerar? "))
-            range_start = int(
-                input("Digite o início do intervalo de valores: "))
-            range_end = int(input("Digite o fim do intervalo de valores: "))
-            data = generate_random_data(n, range_start, range_end)
+            data = generate_random_data(n)
             for value in data:
                 btree.insert(value)
             print("Dados inseridos na árvore B.")
 
         elif choice == '6':
-            operation = input(
-                "Qual operação deseja medir (insert/delete/search)? ")
-            n = int(input("Quantos dados aleatórios para a operação? "))
-            data = generate_random_data(n)
-            execution_time = measure_execution_time(btree, data, operation)
-            memory_usage = measure_memory()
-            print(
-                f"Tempo de execução para {operation}: {execution_time * 1000:.4f} ms")
-            print(f"Uso de memória: {memory_usage / (1024 ** 2):.2f} MB")
-
-        elif choice == '7':
             btree.display()
 
-        elif choice == '8':
-            btree.save_to_file('database/btree.json')
-            print(f"Árvore B salva em 'database/btree.json'.")
+        elif choice == '7':
+            for file in os.listdir('database'):
+                file_path = os.path.join('database', file)
+                os.remove(file_path)
+            print("Arquivos de banco de dados removidos.")
 
-        elif choice == '9':
-            btree.load_from_file('database/btree.json')
-            print(f"Árvore B carregada de 'database/btree.json'.")
+            # criar uma nova árvore B
+            btree = BTree(t)
 
         elif choice == '0':
             print("Saindo do programa.")

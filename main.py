@@ -50,8 +50,7 @@ def main():
     if not os.path.exists('database'):
         os.makedirs('database')
 
-    # Inicializa a árvore B com grau mínimo t = 100
-    t = 2
+    t = 100
     btree = BTree(t)
 
     while True:

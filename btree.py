@@ -151,14 +151,13 @@ class BTree:
         deleted = self.delete(old_k)  # Remove a chave antiga
         if deleted:
             self.insert(new_k)  # Insere a chave nova
-            print(f"Chave {old_k} atualizada para {new_k} na árvore.")
+            return True
         else:
-            print(f"Chave {old_k} não encontrada na árvore.")
+            return False
 
     def delete(self, k):
         """Remove uma chave k da árvore B."""
         if self.search(k) is None:
-            print(f"Chave {k} não encontrada na árvore.")
             return False
 
         self._delete(self.root, k)
@@ -181,10 +180,11 @@ class BTree:
             self.root = None
             os.remove('database/root.json')
 
+            return None
+
         if self.root:
             self.save_node(self.root)
 
-        print(f"Chave {k} deletada da árvore.")
         return True
 
     def _remove_node_from_disk(self, node_id):

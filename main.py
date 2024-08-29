@@ -50,8 +50,8 @@ def main():
     if not os.path.exists('database'):
         os.makedirs('database')
 
-    # Inicializa a árvore B com grau mínimo t = 50
-    t = 100
+    # Inicializa a árvore B com grau mínimo t = 100
+    t = 2
     btree = BTree(t)
 
     while True:
@@ -70,7 +70,7 @@ def main():
 
             print("===========================================================")
             print(
-                f"Valor {k} inserido na árvore em {time_elapsed * 1000:.4f} ms.")
+                f"Valor {k} inserido na árvore em {time_elapsed * 1000:.3f} ms.")
             print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
             print("===========================================================")
 
@@ -87,7 +87,7 @@ def main():
             if result:
                 print("===========================================================")
                 print(
-                    f"Valor {k} encontrado na árvore em {time_elapsed * 1000:.4f} ms.")
+                    f"Valor {k} encontrado na árvore em {time_elapsed * 1000:.3f} ms.")
                 print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
                 print("===========================================================")
             else:
@@ -98,17 +98,20 @@ def main():
             new_k = int(input("Digite o novo valor: "))
 
             start_time = time.time()
-            btree.update(old_k, new_k)
+            updated = btree.update(old_k, new_k)
             end_time = time.time()
 
             time_elapsed = end_time - start_time
             mem_usage = measure_memory()
 
-            print("===========================================================")
-            print(
-                f"Valor {old_k} atualizado para {new_k} em {time_elapsed * 1000:.4f} ms.")
-            print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
-            print("===========================================================")
+            if updated:
+                print("===========================================================")
+                print(
+                    f"Valor {old_k} atualizado para {new_k} em {time_elapsed * 1000:.3f} ms.")
+                print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
+                print("===========================================================")
+            else:
+                print(f"Valor {old_k} não encontrado na árvore.")
 
         elif choice == '4':
             k = int(input("Digite o valor a ser removido: "))
@@ -120,10 +123,12 @@ def main():
             time_elapsed = end_time - start_time
             mem_usage = measure_memory()
 
-            if deleted:
+            if deleted or deleted is None:
+                if deleted is None:
+                    btree = BTree(t)
                 print("===========================================================")
                 print(
-                    f"Valor {k} removido da árvore em {time_elapsed * 1000:.4f} ms.")
+                    f"Valor {k} removido da árvore em {time_elapsed * 1000:.3f} ms.")
                 print(f"Uso de memória: {mem_usage / (1024 ** 2):.2f} MB")
                 print("===========================================================")
             else:

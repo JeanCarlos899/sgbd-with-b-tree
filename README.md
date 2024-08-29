@@ -20,7 +20,7 @@ O objetivo deste projeto é demonstrar a compreensão dos conceitos de Sistemas 
 - `btree.py`: Implementação da classe BTree, que representa a árvore B e suas operações.
 - `btree_node.py`: Implementação da classe BTreeNode, que representa os nós da árvore B.
 - `main.py`: Código principal para interação com o usuário, incluindo um menu para operações CRUD e testes de desempenho.
--`test.py`: Código para testar a performance do algoritmo para cada operação CRUD em um determinado número de operações. 
+- `test.py`: Código para testar a performance do algoritmo para cada operação CRUD em um determinado número de operações. 
 - `database/`: Diretório onde o arquivo JSON da árvore B é salvo e carregado.
 - `README.md`: Este arquivo.
 
